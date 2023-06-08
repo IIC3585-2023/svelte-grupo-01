@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import EditGameForm from './EditGameForm.svelte';
 	import { gamesDB, currentGame } from './gamesDB';
 
@@ -20,9 +21,9 @@
 		{#each $gamesDB.games as game}
 			<li>
 				{game.name}
-				<a href={`/host?game=${game.id}`}>Edit</a>
+				<a href={`${base}/host?game=${game.id}`}>Edit</a>
 				<button on:click={() => gamesDB.deleteGame({ id: game.id })}>Delete</button>
-				<a href={`/host/start?game=${game.id}`}>Start</a>
+				<a href={`${base}/host/start?game=${game.id}`}>Start</a>
 			</li>
 		{/each}
 	</ul>
