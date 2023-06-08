@@ -107,6 +107,8 @@ function createGamesDBStore(): Store {
 export const gamesDB = createGamesDBStore();
 
 export const currentGame = derived([gamesDB, page], ([$gamesDB, $page]) => {
+	if (typeof window === 'undefined') return null;
+
 	const game = $page.url.searchParams.get('game');
 	return game ? $gamesDB.games.find((g) => g.id === parseInt(game)) : null;
 });
