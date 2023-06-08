@@ -1,8 +1,12 @@
+<script>
+	import { base } from '$app/paths';
+</script>
+
 <main>
 	<h1>Competitive Wordle</h1>
 	<nav>
-		<a href="/host">Host</a>
-		<a href="/play">Play</a>
+		<a href={`${base}/host`}>Host</a>
+		<a href={`${base}/play`}>Play</a>
 	</nav>
 </main>
 

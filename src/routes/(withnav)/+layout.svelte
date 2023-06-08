@@ -1,10 +1,14 @@
+<script lang="ts">
+	import { base } from '$app/paths';
+</script>
+
 <nav class="flex flex-col gap-2 sm:flex-row items-center px-4 py-2 border-b-2 border-b-orange-950">
 	<div class="left">
-		<a href="/" class="text-2xl font-bold text-orange-950 leading-tight">Competitive Wordle</a>
+		<a href={base} class="text-2xl font-bold text-orange-950 leading-tight">Competitive Wordle</a>
 	</div>
 	<div class="right">
-		<a href="/host">Host</a>
-		<a href="/play">Play</a>
+		<a href={`${base}/host`}>Host</a>
+		<a href={`${base}/play`}>Play</a>
 	</div>
 </nav>
 
