@@ -35,5 +35,6 @@
 		color: theme('colors.orange.50');
 		width: theme('width.24');
 		text-align: center;
+		border-radius: theme('borderRadius.DEFAULT');
 	}
 </style>

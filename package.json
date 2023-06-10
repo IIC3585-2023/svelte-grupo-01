@@ -29,6 +29,7 @@
 	"dependencies": {
 		"idb": "^7.1.1",
 		"peerjs": "^1.4.7",
+		"rxjs": "^7.8.1",
 		"svelte-dnd-action": "^0.9.22"
 	}
 }

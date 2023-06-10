@@ -13,9 +13,12 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter(),
 		paths: {
-			base: process.env.BASE_PATH ? `/${process.env.BASE_PATH}` : undefined
-		}
-	}
+			base: process.env.BASE_PATH ? `/${process.env.BASE_PATH}` : undefined,
+		},
+		alias: {
+			$lib: './src/lib',
+		},
+	},
 };
 
 export default config;

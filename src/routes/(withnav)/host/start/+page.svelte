@@ -1,26 +1,22 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import { currentGame } from '../gamesDB';
+	import PlayerRanking from './PlayerRanking.svelte';
+	import { createGameHostStore } from './gameHost';
 
-	let id: string;
-	onMount(async () => {
-		const { default: Peer } = await import('peerjs');
-
-		const peer = new Peer();
-		peer.on('open', () => (id = peer.id));
-
-		peer.on('connection', (conn) => {
-			conn.on('data', (data) => {
-				console.log(data);
-			});
-		});
-	});
+	const host = createGameHostStore({ timeInSeconds: 120, words: ['hello', 'world'], delay: 50 });
 </script>
 
-Starting game
+<main class="max-w-2xl mx-auto w-full">
+	{#if $host.status === 'loading'}
+		<div>Loading</div>
+	{:else}
+		{#if $host.status === 'waiting'}
+			<div>Waiting for players to join</div>
+			<button on:click={() => host.start()}>Start Game</button>
+		{:else}
+			Stuff
+		{/if}
+		<PlayerRanking players={$host.players} />
+	{/if}
+</main>
 
-{#if id}
-	{@const url = `${$page.url.origin}/play?game=${id}`}
-	<a href={url}>Play ({url})</a>
-{/if}
+{JSON.stringify($host, null, 2)}

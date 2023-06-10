@@ -2,13 +2,17 @@
 	import { base } from '$app/paths';
 </script>
 
-<nav class="flex flex-col gap-2 sm:flex-row items-center px-4 py-2 border-b-2 border-b-orange-950">
-	<div class="left">
-		<a href={base} class="text-2xl font-bold text-orange-950 leading-tight">Competitive Wordle</a>
-	</div>
-	<div class="right">
-		<a href={`${base}/host`}>Host</a>
-		<a href={`${base}/play`}>Play</a>
+<nav class="border-b-2 border-b-orange-950">
+	<div class="flex flex-col gap-2 sm:flex-row items-center px-4 py-2 max-w-2xl mx-auto">
+		<div class="left">
+			<a href={base || '/'} class="text-2xl font-bold text-orange-950 leading-tight"
+				>Competitive Wordle</a
+			>
+		</div>
+		<div class="right">
+			<a href={`${base}/host`}>Host</a>
+			<a href={`${base}/play`}>Play</a>
+		</div>
 	</div>
 </nav>
 
@@ -29,5 +33,6 @@
 		text-align: center;
 		display: block;
 		width: theme('width.24');
+		border-radius: theme('borderRadius.DEFAULT');
 	}
 </style>

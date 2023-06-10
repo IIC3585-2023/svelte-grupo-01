@@ -17,6 +17,41 @@ declare global {
 			onfinalize?: (event: CustomEvent<DndEvent<ItemType>> & { target: EventTarget & T }) => void;
 		}
 	}
+
+	declare interface PublicPlayer {
+		id: string;
+		name: string;
+		repr: {
+			color: string;
+			emoji: number;
+		};
+		currentWordIndex: number;
+		guesses: {
+			result: GuessChar[];
+			time: number;
+			wordIndex: number;
+		}[];
+	}
+
+	declare interface PrivatePlayer extends PublicPlayer {
+		guesses: {
+			result: GuessChar[];
+			time: number;
+			wordIndex: number;
+			guess: string;
+		}[];
+	}
+
+	type GuessChar = 'C' | 'P' | 'A';
+
+	declare type MessageToHost =
+		| { type: 'player-name'; name: string }
+		| { type: 'player-guess'; guess: string };
+
+	type GameState = { type: 'game-state'; players: PublicPlayer[]; self: PrivatePlayer };
+	declare type MessageToPlayer =
+		| GameState &
+				({ status: 'waiting' } | { status: 'playing'; startTime: number; endTime: number });
 }
 
 export {};

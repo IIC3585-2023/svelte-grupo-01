@@ -1,6 +1,7 @@
 import { openDB, type DBSchema } from 'idb';
 import { page } from '$app/stores';
-import { derived } from 'svelte/store';
+import { derived, type Readable } from 'svelte/store';
+import { browser } from '$app/environment';
 
 export type Game = {
 	id: number;
@@ -14,12 +15,11 @@ type State = {
 	status: 'loading' | 'ready';
 };
 
-type Store = {
-	subscribe: (fn: Subscription) => () => void;
+interface DBStore extends Readable<State> {
 	createGame: (game: Pick<Game, 'name'>) => void;
 	deleteGame: (game: Pick<Game, 'id'>) => void;
 	updateGame: (game: Game) => void;
-};
+}
 
 type Subscription = (state: State) => void;
 
@@ -30,9 +30,9 @@ interface GamesSchema extends DBSchema {
 	};
 }
 
-function createGamesDBStore(): Store {
+function createGamesDBStore(): DBStore {
 	// on SSR, return dummy
-	if (typeof window === 'undefined') {
+	if (!browser) {
 		return {
 			createGame: () => {},
 			deleteGame: () => {},
@@ -40,7 +40,7 @@ function createGamesDBStore(): Store {
 			subscribe: (fn) => {
 				fn({ games: [], status: 'loading' });
 				return () => {};
-			}
+			},
 		};
 	}
 
@@ -53,7 +53,7 @@ function createGamesDBStore(): Store {
 		const db = await openDB<GamesSchema>('wordle-games', 1, {
 			upgrade(database) {
 				database.createObjectStore('games', { keyPath: 'id' });
-			}
+			},
 		});
 
 		state.games = await db.getAll('games');
@@ -96,11 +96,10 @@ function createGamesDBStore(): Store {
 		},
 		updateGame: async (game: Game) => {
 			const { db } = await prepareDBPromise;
-			console.log(game);
 			await db.put('games', game);
 			refreshChannel.postMessage('refresh');
 			refreshGames();
-		}
+		},
 	};
 }
 
