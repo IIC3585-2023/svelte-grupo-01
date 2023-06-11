@@ -123,15 +123,17 @@ function createPlayer(id: string, send: (data: MessageToPlayer) => void) {
 
 function checkGuess(word: string, guess: string) {
 	let ok = true;
-	const lowerCaseWord = word.toLowerCase();
+	const w = word.toUpperCase();
+	const g = guess.toUpperCase();
+
 	let match: GuessChar[] = [];
 
 	for (let i = 0; i < word.length; i++) {
-		if (lowerCaseWord[i] === guess[i]) {
+		if (w[i] === g[i]) {
 			match.push('C');
 		} else {
 			ok = false;
-			if (lowerCaseWord.includes(guess[i])) {
+			if (w.includes(g[i])) {
 				match.push('P');
 			} else {
 				match.push('A');
