@@ -2,7 +2,7 @@ import type { Readable, Subscriber } from 'svelte/store';
 import type { Game } from '../gamesDB';
 import type { Peer } from '$lib/peer';
 import { getRandomColor, getRandomEmojiIndex } from '$lib/repr';
-import { createDummyStore, subscriberHandler } from '$lib/storeUtils';
+import { subscriberHandler } from '$lib/storeUtils';
 
 type Guess = { wordIndex: number; time: number; guess: string; result: GuessChar[] };
 
@@ -24,8 +24,6 @@ interface HostGameStore extends Readable<HostGameState> {
 }
 
 export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
-	if (typeof window === 'undefined') return createDummyStore({ status: 'waiting', players: [] }, 'start');
-
 	let state: HostGameState = { status: 'waiting', players: [] };
 
 	peer.on('connection', (conn) => {
@@ -125,15 +123,17 @@ function createPlayer(id: string, send: (data: MessageToPlayer) => void) {
 
 function checkGuess(word: string, guess: string) {
 	let ok = true;
-	const lowerCaseWord = word.toLowerCase();
+	const w = word.toUpperCase();
+	const g = guess.toUpperCase();
+
 	let match: GuessChar[] = [];
 
 	for (let i = 0; i < word.length; i++) {
-		if (lowerCaseWord[i] === guess[i]) {
+		if (w[i] === g[i]) {
 			match.push('C');
 		} else {
 			ok = false;
-			if (lowerCaseWord.includes(guess[i])) {
+			if (w.includes(g[i])) {
 				match.push('P');
 			} else {
 				match.push('A');

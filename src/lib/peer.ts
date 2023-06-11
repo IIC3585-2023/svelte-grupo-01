@@ -1,8 +1,8 @@
 import type { Peer } from 'peerjs';
-export type { Peer, ConnectionType as Connection } from 'peerjs';
+export type { Peer, DataConnection as Connection } from 'peerjs';
 
 export const loadPeerPromise = new Promise<Peer>(async (resolve, reject) => {
-	if (typeof window === 'undefined') return;
+	if (typeof window === 'undefined') return; // No hay problema con no resolver en SSR
 
 	const { default: Peer } = await import('peerjs');
 	const peer = new Peer();

@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { getEmoji, guessesColors } from '$lib/repr';
 	import type { PlayerInternalState } from './host';
+	import { flip } from 'svelte/animate';
 
 	export let players: PlayerInternalState[];
 </script>
 
 <ul class="flex flex-col gap-4 p-4">
 	{#each players as { representation, name, id, currentWordIndex, guesses } (id)}
-		<li class="flex gap-2">
+		<li class="flex gap-2" animate:flip>
 			<div
 				style:background-color={representation.color}
 				class="w-20 h-20 text-4xl justify-center flex items-center rounded-xl"

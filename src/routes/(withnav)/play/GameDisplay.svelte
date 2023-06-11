@@ -3,11 +3,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 
-	import type { Observable, last } from 'rxjs';
-	import { fly, fade, crossfade } from 'svelte/transition';
+	import type { Observable } from 'rxjs';
+	import { fade, crossfade } from 'svelte/transition';
 	import { readable } from 'svelte/store';
 
-	export let gameState: Observable<MessageToPlayer>;
+	export let gameState: Observable<PublicGameState>;
 
 	const dispatch = createEventDispatcher<{
 		changeName: string;
@@ -42,7 +42,9 @@
 	$: canGuess =
 		$gameState.status === 'playing' && $currentTime < $gameState.endTime && $currentTime > $gameState.startTime;
 
-	$: disabled = !canGuess;
+	$: done = $gameState.wordsLengths.length === $gameState.self.currentWordIndex;
+
+	$: disabled = !canGuess || done;
 </script>
 
 <div class="flex flex-col justify-center items-center w-full gap-4 mt-6">
@@ -89,6 +91,10 @@
 		</div>
 	{/key}
 </div>
+
+{#if done}
+	<div class="text-center text-orange-300">You won!</div>
+{/if}
 
 <form
 	on:submit|preventDefault={() => {
