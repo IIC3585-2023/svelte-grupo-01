@@ -23,6 +23,6 @@
 	{:then [peer, game]}
 		<HostGameScreen {peer} {game} />
 	{:catch error}
-		An error occurred: {JSON.stringify(error)}
+		An error occurred: {JSON.stringify(error)} {error?.toString()}
 	{/await}
 </main>

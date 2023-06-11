@@ -7,5 +7,5 @@ export const loadPeerPromise = new Promise<Peer>(async (resolve, reject) => {
 	const { default: Peer } = await import('peerjs');
 	const peer = new Peer();
 	peer.on('open', () => resolve(peer));
-	peer.on('error', (err) => reject(err));
+	peer.on('error', (err) => reject({ type: 'peer', err }));
 });
