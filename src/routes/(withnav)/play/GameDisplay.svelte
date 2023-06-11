@@ -3,11 +3,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 
-	import type { Observable, last } from 'rxjs';
-	import { fly, fade, crossfade } from 'svelte/transition';
+	import type { Observable } from 'rxjs';
+	import { fade, crossfade } from 'svelte/transition';
 	import { readable } from 'svelte/store';
 
-	export let gameState: Observable<MessageToPlayer>;
+	export let gameState: Observable<PublicGameState>;
 
 	const dispatch = createEventDispatcher<{
 		changeName: string;

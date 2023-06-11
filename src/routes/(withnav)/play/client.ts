@@ -1,7 +1,7 @@
 import type { Peer, Connection } from '$lib/peer';
 import type { Readable } from 'svelte/store';
 import { subscriberHandler } from '$lib/storeUtils';
-import { Observable, fromEventPattern, first, shareReplay } from 'rxjs';
+import { Observable, fromEventPattern, first, shareReplay, filter } from 'rxjs';
 
 type StateReadyToConnect = {
 	status: 'ready-to-connect';
@@ -15,7 +15,7 @@ type State =
 	| {
 			status: 'connected';
 			sendMessage: (data: MessageToHost) => void;
-			messageObservable: Observable<MessageToPlayer>;
+			gameStateObservable: Observable<PublicGameState>;
 	  };
 
 interface ClientGameStore extends Readable<State> {
@@ -43,11 +43,11 @@ export function createGameClientStore(peer: Peer): ClientGameStore {
 		}, 5000);
 
 		const sendMessage = (data: MessageToHost) => conn.send(data);
-		const messageObservable = createMessageObservable(conn);
-		state = { status: 'connected', sendMessage, messageObservable };
+		const gameStateObservable = createMessageObservable(conn);
+		state = { status: 'connected', sendMessage, gameStateObservable };
 
 		// Notificar que está listo en el primer mensaje
-		messageObservable.pipe(first()).subscribe(() => notifySubscribers());
+		gameStateObservable.pipe(first()).subscribe(() => notifySubscribers());
 
 		conn.on('close', () => {
 			state = { status: 'ready-to-connect', connect };
@@ -72,5 +72,8 @@ function createMessageObservable(conn: Connection) {
 			(handler) => conn.on('data', handler),
 			(handler) => conn.off('data', handler),
 		) as Observable<MessageToPlayer>
-	).pipe(shareReplay(1));
+	).pipe(
+		filter(({ type }) => type === 'game-state'),
+		shareReplay(1),
+	);
 }

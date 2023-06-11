@@ -22,7 +22,7 @@
 	</form>
 {:else if $client.status === 'connected'}
 	<GameDisplay
-		gameState={$client.messageObservable}
+		gameState={$client.gameStateObservable}
 		on:changeName={(event) => client.changeName(event.detail)}
 		on:guess={(event) => client.guessWord(event.detail)}
 	/>
