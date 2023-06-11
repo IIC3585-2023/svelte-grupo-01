@@ -2,7 +2,7 @@ import type { Readable, Subscriber } from 'svelte/store';
 import type { Game } from '../gamesDB';
 import type { Peer } from '$lib/peer';
 import { getRandomColor, getRandomEmojiIndex } from '$lib/repr';
-import { createDummyStore, subscriberHandler } from '$lib/storeUtils';
+import { subscriberHandler } from '$lib/storeUtils';
 
 type Guess = { wordIndex: number; time: number; guess: string; result: GuessChar[] };
 
@@ -24,8 +24,6 @@ interface HostGameStore extends Readable<HostGameState> {
 }
 
 export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
-	if (typeof window === 'undefined') return createDummyStore({ status: 'waiting', players: [] }, 'start');
-
 	let state: HostGameState = { status: 'waiting', players: [] };
 
 	peer.on('connection', (conn) => {
