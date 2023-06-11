@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { Peer } from '$lib/peer';
-	import { getEmoji } from '$lib/repr';
 	import type { Game } from '../gamesDB';
 	import PlayerRanking from './PlayerRanking.svelte';
 
@@ -24,7 +24,7 @@
 	{#if $host.status === 'waiting'}
 		<button
 			on:click={() => {
-				navigator.clipboard.writeText(`${location.origin}/play?game=${peer.id}`);
+				navigator.clipboard.writeText(`${location.origin}${base}/play?game=${peer.id}`);
 			}}
 			class="px-4 py-2 bg-orange-300 rounded text-orange-950"
 		>
