@@ -1,22 +1,29 @@
 <script lang="ts">
-	import PlayerRanking from './PlayerRanking.svelte';
-	import { createGameHostStore } from './gameHost';
+	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
+	import { loadPeerPromise } from '$lib/peer';
 
-	const host = createGameHostStore({ timeInSeconds: 120, words: ['hello', 'world'], delay: 50 });
+	import { gamesDB } from '../gamesDB';
+	import HostGameScreen from './HostGameScreen.svelte';
+
+	const promise = Promise.all([loadPeerPromise, gamesDB.readyPromise]).then(([peer, games]) => {
+		const gameIdStr = $page.url.searchParams.get('game');
+		if (!gameIdStr) throw new Error('No game ID');
+
+		const gameId = parseInt(gameIdStr);
+		const game = games.find((game) => game.id === gameId);
+		if (!game) throw new Error('Game not found');
+
+		return [peer, game] as const;
+	});
 </script>
 
 <main class="max-w-2xl mx-auto w-full">
-	{#if $host.status === 'loading'}
+	{#await promise}
 		<div>Loading</div>
-	{:else}
-		{#if $host.status === 'waiting'}
-			<div>Waiting for players to join</div>
-			<button on:click={() => host.start()}>Start Game</button>
-		{:else}
-			Stuff
-		{/if}
-		<PlayerRanking players={$host.players} />
-	{/if}
+	{:then [peer, game]}
+		<HostGameScreen {peer} {game} />
+	{:catch error}
+		An error occurred: {JSON.stringify(error)}
+	{/await}
 </main>
-
-{JSON.stringify($host, null, 2)}

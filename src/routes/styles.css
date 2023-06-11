@@ -8,7 +8,7 @@ body {
 }
 
 body {
-	background-color: theme('backgroundColor.orange.100');
+	background-color: theme('backgroundColor.gray.100');
 	display: flex;
 	flex-direction: column;
 }

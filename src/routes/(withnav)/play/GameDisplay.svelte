@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { getEmoji } from '$lib/emojis';
+	import { getEmoji, guessesColors } from '$lib/repr';
 	import { createEventDispatcher } from 'svelte';
+	import { quintOut } from 'svelte/easing';
+
 	import type { Observable, last } from 'rxjs';
+	import { fly, fade, crossfade } from 'svelte/transition';
 	import { readable } from 'svelte/store';
 
 	export let gameState: Observable<MessageToPlayer>;
@@ -10,6 +13,23 @@
 		changeName: string;
 		guess: string;
 	}>();
+
+	// TODO: ver si se puede arreglar la animación
+	const [send, receive] = crossfade({
+		fallback(node, params) {
+			const style = getComputedStyle(node);
+			const transform = style.transform === 'none' ? '' : style.transform;
+
+			return {
+				duration: 600,
+				easing: quintOut,
+				css: (t) => `
+					transform: ${transform} scale(${t});
+					opacity: ${t}
+				`,
+			};
+		},
+	});
 
 	const currentTime = readable(Date.now(), (set) => {
 		const interval = setInterval(() => set(Date.now()), 100);
@@ -20,27 +40,17 @@
 	let guess: string = '';
 
 	$: canGuess =
-		$gameState.status === 'playing' &&
-		$currentTime < $gameState.endTime &&
-		$currentTime > $gameState.startTime;
+		$gameState.status === 'playing' && $currentTime < $gameState.endTime && $currentTime > $gameState.startTime;
 
 	$: disabled = !canGuess;
-
-	const guessesColors = {
-		C: 'hsl(130, 80%, 90%)',
-		A: 'hsl(50, 80%, 90%)',
-		P: 'hsl(25, 70%, 95%)',
-	};
-
-	$: lastGuess = $gameState.self.guesses[$gameState.self.guesses.length - 1];
 </script>
 
-<div class="flex flex-col justify-center items-center w-full gap-4">
+<div class="flex flex-col justify-center items-center w-full gap-4 mt-6">
 	<div
-		style:background-color={$gameState.self.repr.color}
+		style:background-color={$gameState.self.representation.color}
 		class="w-24 h-24 text-6xl flex items-center justify-center rounded-lg shadow-inner"
 	>
-		{getEmoji($gameState.self.repr.emoji)}
+		{getEmoji($gameState.self.representation.emojiIndex)}
 	</div>
 	<form on:submit|preventDefault={() => dispatch('changeName', changedName)} class="h-full">
 		<input
@@ -53,17 +63,31 @@
 	</form>
 </div>
 
-<div class="h-16 flex gap-4 justify-center items-center">
-	{#if lastGuess}
-		{#each lastGuess.result as result, index}
-			<span
-				class="flex justify-center items-center h-12 w-12"
-				style:background-color={guessesColors[result]}
-			>
-				{lastGuess.guess[index]}
-			</span>
-		{/each}
-	{/if}
+<div class="p-4 h-32 mx-auto w-min mb-16">
+	{#key $gameState.self.lastGuess?.time}
+		<div class="flex gap-4 mb-4 w-min">
+			{#if $gameState.self.lastGuess}
+				{#each $gameState.self.lastGuess.result as result, index}
+					<span
+						in:receive={{ key: index }}
+						class="flex justify-center items-center h-12 w-12"
+						style:background-color={guessesColors[result]}
+					>
+						{$gameState.self.lastGuess.guess.at(index) ?? ''}
+					</span>
+				{/each}
+			{/if}
+		</div>
+	{/key}
+	{#key $gameState.self.lastGuess?.time}
+		<div class="flex gap-4 w-min">
+			{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
+				<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-12 w-12 bg-slate-200"
+					>{guess.at(index) ?? ''}</span
+				>
+			{/each}
+		</div>
+	{/key}
 </div>
 
 <form
@@ -71,15 +95,22 @@
 		dispatch('guess', guess);
 		guess = '';
 	}}
+	class="flex flex-col gap-4 justify-center items-center w-full"
 >
 	<input
 		bind:value={guess}
 		{disabled}
 		type="text"
 		name="word"
-		class="font-mono font-bold text-xl"
+		class="font-mono font-bold text-xl border shadow-inner"
+		minlength={$gameState.wordsLengths[$gameState.self.currentWordIndex]}
+		maxlength={$gameState.wordsLengths[$gameState.self.currentWordIndex]}
 	/>
-	<button type="submit" {disabled}>Submit</button>
+	<button type="submit" {disabled} class="disabled:bg-orange-200 bg-orange-500 text-orange-50 px-4 py-2">Submit</button>
 </form>
 
-{JSON.stringify($gameState, null, 2)}
+{#if $gameState.status === 'waiting'}
+	<div class="mt-8 text-center text-orange-300">Waiting for the game to start...</div>
+{/if}
+
+<!-- {JSON.stringify($gameState, null, 2)} -->

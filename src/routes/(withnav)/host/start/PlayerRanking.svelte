@@ -1,40 +1,38 @@
 <script lang="ts">
-	import { getEmoji } from '$lib/emojis';
-	import type { Player } from './gameHost';
+	import { getEmoji, guessesColors } from '$lib/repr';
+	import type { PlayerInternalState } from './host';
 
-	export let players: Player[];
-
-	const guessesColors = {
-		C: 'hsl(130, 80%, 90%)',
-		A: 'hsl(50, 80%, 90%)',
-		P: 'hsl(25, 70%, 95%)',
-	};
+	export let players: PlayerInternalState[];
 </script>
 
-<ol>
-	{#each players as player (player.id)}
-		<li class="flex gap-4 bg-orange-400">
-			<div class="flex gap-4">
-				<div
-					class="h-14 w-14 text-2xl font-bold flex justify-center items-center bg-orange-200 text-orange-900"
-				>
-					{player.currentWordIndex}
+<ul class="flex flex-col gap-4 p-4">
+	{#each players as { representation, name, id, currentWordIndex, guesses } (id)}
+		<li class="flex gap-2">
+			<div
+				style:background-color={representation.color}
+				class="w-20 h-20 text-4xl justify-center flex items-center rounded-xl"
+			>
+				{getEmoji(representation.emojiIndex)}
+			</div>
+			<div>
+				<div>
+					{name || 'Anonymous'}
 				</div>
-				<div
-					style:background-color={player.repr.color}
-					class="h-14 w-14 text-4xl flex justify-center items-center shadow-inner"
-				>
-					{getEmoji(player.repr.emoji)}
+				<div>
+					{currentWordIndex} words guessed
+				</div>
+				<div>
+					{guesses.length} attempts
 				</div>
 			</div>
-			<ol class="flex gap-4">
-				{#each player.guesses[player.guesses.length - 1]?.result ?? ['A', 'A', 'A', 'A', 'A', 'A'] as guess}
-					<li class="h-14 w-14" style:background-color={guessesColors[guess]} />
-				{/each}
-			</ol>
-			<div class="flex px-4 items-center bg-orange-50 flex-grow">
-				{player.name || 'Benja'}
-			</div>
+			{#if guesses.length !== 0}
+				{@const lastGuess = guesses[guesses.length - 1]}
+				<div class="flex gap-4">
+					{#each lastGuess.result as result, index}
+						<span class="flex justify-center items-center h-12 w-12" style:background-color={guessesColors[result]} />
+					{/each}
+				</div>
+			{/if}
 		</li>
 	{/each}
-</ol>
+</ul>

@@ -2,11 +2,22 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
+	import { derived } from 'svelte/store';
 
 	import EditGameForm from './EditGameForm.svelte';
-	import { gamesDB, currentGame } from './gamesDB';
+	import { gamesDB } from './gamesDB';
+	import { browser } from '$app/environment';
 
 	let newGameName: string = '';
+
+	const currentGame = derived([gamesDB, page], ([$gamesDB, $page]) => {
+		if (!browser) return null;
+
+		const currentGameId = $page.url.searchParams.get('game');
+		if (currentGameId === null) return null;
+		const id = parseInt(currentGameId);
+		return $gamesDB.games.find((game) => game.id === id);
+	});
 </script>
 
 <main class="max-w-2xl mx-auto w-full px-4 py-2">
@@ -25,13 +36,7 @@
 		/>
 	{:else}
 		<form class="flex gap-2 my-4" on:submit={() => gamesDB.createGame({ name: newGameName })}>
-			<input
-				required
-				minlength="1"
-				class="flex-grow rounded px-4"
-				type="text"
-				bind:value={newGameName}
-			/>
+			<input required minlength="1" class="flex-grow rounded px-4" type="text" bind:value={newGameName} />
 			<button type="submit" class="bg-orange-600 text-orange-50 px-4 py-1 rounded">Create</button>
 		</form>
 		<ul class="flex flex-col gap-2">

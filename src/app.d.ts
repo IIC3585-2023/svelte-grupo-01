@@ -18,40 +18,27 @@ declare global {
 		}
 	}
 
-	declare interface PublicPlayer {
-		id: string;
-		name: string;
-		repr: {
-			color: string;
-			emoji: number;
-		};
-		currentWordIndex: number;
-		guesses: {
-			result: GuessChar[];
-			time: number;
-			wordIndex: number;
-		}[];
-	}
-
-	declare interface PrivatePlayer extends PublicPlayer {
-		guesses: {
-			result: GuessChar[];
-			time: number;
-			wordIndex: number;
-			guess: string;
-		}[];
-	}
-
+	// Correct - Present - Absent
 	type GuessChar = 'C' | 'P' | 'A';
 
-	declare type MessageToHost =
-		| { type: 'player-name'; name: string }
-		| { type: 'player-guess'; guess: string };
+	declare type MessageToHost = { type: 'player-name'; name: string } | { type: 'player-guess'; guess: string };
 
-	type GameState = { type: 'game-state'; players: PublicPlayer[]; self: PrivatePlayer };
-	declare type MessageToPlayer =
-		| GameState &
-				({ status: 'waiting' } | { status: 'playing'; startTime: number; endTime: number });
+	type PublicGuess = { wordIndex: number; time: number; result: GuessChar[] };
+	type PrivateGuess = PublicGuess & { guess: string };
+
+	interface PublicPlayer {
+		id: string;
+		name: string;
+		representation: { color: string; emojiIndex: number };
+		currentWordIndex: number;
+	}
+	declare type PublicGameState = {
+		self: PublicPlayer & { lastGuess?: PrivateGuess };
+		players: (PublicPlayer & { lastGuess?: PublicGuess })[];
+		wordsLengths: number[];
+	} & ({ status: 'waiting' } | { status: 'playing'; startTime: number; endTime: number });
+
+	declare type MessageToPlayer = { type: 'game-state' } & PublicGameState;
 }
 
 export {};

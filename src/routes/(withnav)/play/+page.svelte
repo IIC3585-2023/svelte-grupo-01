@@ -24,20 +24,19 @@
 	}
 </script>
 
-<main class="max-w-2xl w-full mx-auto">
+<main class="max-w-2xl w-full mx-auto h-full">
 	{#if $client.status === 'loading'}
-		<div>Loading</div>
+		<div class="flex justify-center items-center h-full">Loading</div>
 	{:else if $client.status === 'establishing-connection'}
-		<div>Establishing connection</div>
+		<div class="flex justify-center items-center h-full">Establishing connection</div>
 	{:else if $client.status === 'ready-to-connect'}
 		{@const connect = $client.connect}
-		<h1>Join Game</h1>
-		<form action="GET" on:submit|preventDefault={() => connect(connectionInputValue)}>
-			<input type="text" name="game" bind:value={connectionInputValue} />
-			<button type="submit">Join</button>
+		<h1 class="text-center font-bold text-xl mt-8">Join Game</h1>
+		<form class="flex flex-col my-4 gap-4 px-4" on:submit|preventDefault={() => connect(connectionInputValue)}>
+			<input class="rounded px-2 py-1" type="text" name="game" bind:value={connectionInputValue} />
+			<button type="submit" class="bg-orange-400 rounded px-4 py-2">Join</button>
 		</form>
 	{:else if $client.status === 'connected'}
-		<div>Connected</div>
 		<GameDisplay
 			gameState={$client.messageObservable}
 			on:changeName={(event) => {
@@ -52,5 +51,4 @@
 	{:else}
 		<h1>Joining game</h1>
 	{/if}
-	{JSON.stringify($client)}
 </main>

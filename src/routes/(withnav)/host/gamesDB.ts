@@ -1,6 +1,5 @@
-import { openDB, type DBSchema } from 'idb';
-import { page } from '$app/stores';
-import { derived, type Readable } from 'svelte/store';
+import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import type { Readable, Subscriber } from 'svelte/store';
 import { browser } from '$app/environment';
 
 export type Game = {
@@ -10,18 +9,14 @@ export type Game = {
 	words: string[];
 };
 
-type State = {
-	games: Game[];
-	status: 'loading' | 'ready';
-};
+type State = { games: Game[]; status: 'loading' | 'ready' };
 
 interface DBStore extends Readable<State> {
+	readyPromise: Promise<Game[]>;
 	createGame: (game: Pick<Game, 'name'>) => void;
 	deleteGame: (game: Pick<Game, 'id'>) => void;
 	updateGame: (game: Game) => void;
 }
-
-type Subscription = (state: State) => void;
 
 interface GamesSchema extends DBSchema {
 	games: {
@@ -30,10 +25,13 @@ interface GamesSchema extends DBSchema {
 	};
 }
 
+type DB = IDBPDatabase<GamesSchema>;
+
 function createGamesDBStore(): DBStore {
 	// on SSR, return dummy
 	if (!browser) {
 		return {
+			readyPromise: Promise.resolve([]),
 			createGame: () => {},
 			deleteGame: () => {},
 			updateGame: () => {},
@@ -46,7 +44,7 @@ function createGamesDBStore(): DBStore {
 
 	const state: State = { games: [], status: 'loading' };
 	const refreshChannel = new BroadcastChannel('games-refresh');
-	const subscriptions: Subscription[] = [];
+	const subscriptions: Subscriber<State>[] = [];
 	const prepareDBPromise = prepareDB();
 
 	async function prepareDB() {
@@ -56,11 +54,11 @@ function createGamesDBStore(): DBStore {
 			},
 		});
 
-		state.games = await db.getAll('games');
 		state.status = 'ready';
+		state.games = await db.getAll('games');
 		notify();
 
-		return { db };
+		return { db, games: state.games };
 	}
 
 	async function refreshGames() {
@@ -75,39 +73,33 @@ function createGamesDBStore(): DBStore {
 
 	refreshChannel.addEventListener('message', refreshGames);
 
+	function withDBTransaction<T>(fn: (params: { db: DB } & T) => Promise<void>) {
+		return async function action(params: T) {
+			await fn({ db: (await prepareDBPromise).db, ...params });
+			refreshChannel.postMessage('refresh');
+			refreshGames();
+		};
+	}
+
 	return {
-		subscribe: (fn: Subscription) => {
+		readyPromise: prepareDBPromise.then(({ games }) => games),
+		subscribe: (fn: Subscriber<State>) => {
 			subscriptions.push(fn);
 			fn(state);
 			return () => subscriptions.splice(subscriptions.indexOf(fn), 1);
 		},
-		createGame: async ({ name }) => {
-			const { db } = await prepareDBPromise;
+		createGame: withDBTransaction(async ({ db, name }) => {
 			const game = { id: +new Date(), name, timeInSeconds: 300, words: [] };
 			await db.put('games', game);
-			refreshChannel.postMessage('refresh');
-			refreshGames();
-		},
-		deleteGame: async ({ id }: Pick<Game, 'id'>) => {
-			const { db } = await prepareDBPromise;
+		}),
+
+		deleteGame: withDBTransaction(async ({ db, id }) => {
 			await db.delete('games', id);
-			refreshChannel.postMessage('refresh');
-			refreshGames();
-		},
-		updateGame: async (game: Game) => {
-			const { db } = await prepareDBPromise;
+		}),
+		updateGame: withDBTransaction(async ({ db, ...game }) => {
 			await db.put('games', game);
-			refreshChannel.postMessage('refresh');
-			refreshGames();
-		},
+		}),
 	};
 }
 
 export const gamesDB = createGamesDBStore();
-
-export const currentGame = derived([gamesDB, page], ([$gamesDB, $page]) => {
-	if (typeof window === 'undefined') return null;
-
-	const game = $page.url.searchParams.get('game');
-	return game ? $gamesDB.games.find((g) => g.id === parseInt(game)) : null;
-});
