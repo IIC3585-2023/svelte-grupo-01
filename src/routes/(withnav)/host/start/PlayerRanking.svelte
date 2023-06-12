@@ -7,6 +7,9 @@
 </script>
 
 <ul class="flex flex-col gap-4 p-4">
+	{#if players.length === 0}
+		<li class="text-center">Waiting for players...</li>
+	{/if}
 	{#each players as { representation, name, id, currentWordIndex, guesses } (id)}
 		<li class="flex gap-2" animate:flip>
 			<div

@@ -3,6 +3,7 @@
 	import type { Peer } from '$lib/peer';
 	import type { Game } from '../gamesDB';
 	import PlayerRanking from './PlayerRanking.svelte';
+	import QRCode from './QRJS.svelte';
 
 	import { createGameHostStore } from './host';
 
@@ -34,5 +35,9 @@
 		<button on:click={() => host.start()} class="px-4 py-2 bg-orange-300 rounded text-orange-950">Start Game</button>
 	{/if}
 </div>
+
+{#if $host.status === 'waiting'}
+	<QRCode codeValue={`${location.origin}${base}/play?game=${peer.id}`} squareSize="200" />
+{/if}
 
 <PlayerRanking players={$host.players} />
