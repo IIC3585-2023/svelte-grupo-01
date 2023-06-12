@@ -30,7 +30,7 @@
 				{@const lastGuess = guesses[guesses.length - 1]}
 				<div class="flex gap-4">
 					{#each lastGuess.result as result, index}
-						<span class="flex justify-center items-center h-12 w-12" style:background-color={guessesColors[result]} />
+						<span class="flex justify-center items-center h-8 w-8" style:background-color={guessesColors[result]} />
 					{/each}
 				</div>
 			{/if}

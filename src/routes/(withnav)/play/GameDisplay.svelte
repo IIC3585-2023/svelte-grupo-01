@@ -67,12 +67,12 @@
 
 <div class="p-4 h-32 mx-auto w-min mb-16">
 	{#key $gameState.self.lastGuess?.time}
-		<div class="flex gap-4 mb-4 w-min">
+		<div class="flex gap-2 mb-4 w-min">
 			{#if $gameState.self.lastGuess}
 				{#each $gameState.self.lastGuess.result as result, index}
 					<span
 						in:receive={{ key: index }}
-						class="flex justify-center items-center h-12 w-12"
+						class="flex justify-center items-center h-8 w-8"
 						style:background-color={guessesColors[result]}
 					>
 						{$gameState.self.lastGuess.guess.at(index) ?? ''}
@@ -82,9 +82,9 @@
 		</div>
 	{/key}
 	{#key $gameState.self.lastGuess?.time}
-		<div class="flex gap-4 w-min">
+		<div class="flex gap-2 w-min">
 			{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
-				<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-12 w-12 bg-slate-200"
+				<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-8 w-8 bg-slate-200"
 					>{guess.at(index) ?? ''}</span
 				>
 			{/each}
