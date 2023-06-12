@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import type { Peer } from '$lib/peer';
+	import { onDestroy } from 'svelte';
 	import type { Game } from '../gamesDB';
 	import PlayerRanking from './PlayerRanking.svelte';
 
@@ -10,6 +11,7 @@
 	export let game: Game;
 
 	const host = createGameHostStore(peer, game);
+	onDestroy(() => host.destroy());
 </script>
 
 <div class="text-center mt-4">

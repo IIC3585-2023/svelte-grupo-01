@@ -21,6 +21,7 @@ type HostGameState = {
 
 interface HostGameStore extends Readable<HostGameState> {
 	start: () => void;
+	destroy: () => void;
 }
 
 export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
@@ -104,7 +105,11 @@ export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
 		for (const ply of state.players) ply.send({ type: 'game-state', ...publicState(state, ply, game) });
 	}
 
-	return { start, subscribe };
+	function destroy() {
+		peer.destroy();
+	}
+
+	return { start, subscribe, destroy };
 }
 
 function createPlayer(id: string, send: (data: MessageToPlayer) => void) {
