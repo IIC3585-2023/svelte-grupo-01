@@ -17,7 +17,7 @@
 	});
 </script>
 
-<main class="max-w-2xl mx-auto w-full">
+<main class="max-w-3xl mx-auto w-full">
 	{#await promise}
 		<div>Loading</div>
 	{:then [peer, game]}
