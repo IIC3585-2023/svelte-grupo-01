@@ -2,8 +2,12 @@
 	import { page } from '$app/stores';
 	import ClientGameScreen from './ClientGameScreen.svelte';
 	import { loadPeerPromise } from '$lib/peer';
+	import { browser } from '$app/environment';
 
-	const queryParamId = $page.url.searchParams.get('game');
+	let queryParamId: string | null = null;
+	if (browser) {
+		queryParamId = $page.url.searchParams.get('game');
+	}
 </script>
 
 <main class="max-w-2xl w-full mx-auto h-full">
