@@ -41,6 +41,7 @@
 
 	$: canGuess =
 		$gameState.status === 'playing' && $currentTime < $gameState.endTime && $currentTime > $gameState.startTime;
+	$: gameEnded = $gameState.status === 'playing' && $currentTime > $gameState.startTime;
 
 	$: done = $gameState.wordsLengths.length === $gameState.self.currentWordIndex;
 
@@ -67,7 +68,7 @@
 
 <div class="py-4 h-32 mx-auto w-min mb-16">
 	{#key $gameState.self.lastGuess?.time}
-		<div class="flex gap-1 mb-4 w-min">
+		<div class="flex justify-center gap-1 mb-4 w-min">
 			{#if $gameState.self.lastGuess}
 				{#each $gameState.self.lastGuess.result as result, index}
 					<span
@@ -82,7 +83,7 @@
 		</div>
 	{/key}
 	{#key $gameState.self.lastGuess?.time}
-		<div class="flex gap-1 w-min">
+		<div class="flex justify-center gap-1 w-min">
 			{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
 				<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-8 w-8 bg-slate-200"
 					>{guess.at(index) ?? ''}</span
@@ -93,7 +94,10 @@
 </div>
 
 {#if done}
-	<div class="text-center text-orange-300">You won!</div>
+	<div class="text-center text-orange-500">You won!</div>
+{/if}
+{#if gameEnded}
+	<div class="text-center text-orange-500">Game ended!</div>
 {/if}
 
 <form
