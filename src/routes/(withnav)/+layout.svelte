@@ -5,9 +5,7 @@
 <nav class="border-b-2 border-b-orange-950">
 	<div class="flex flex-col gap-2 sm:flex-row items-center px-4 py-2 max-w-2xl mx-auto">
 		<div class="left">
-			<a href={base || '/'} class="text-2xl font-bold text-orange-950 leading-tight"
-				>Competitive Wordle</a
-			>
+			<a href={base || '/'} class="text-2xl font-bold text-orange-950 leading-tight">Competitive Wordle</a>
 		</div>
 		<div class="right">
 			<a href={`${base}/host`}>Host</a>

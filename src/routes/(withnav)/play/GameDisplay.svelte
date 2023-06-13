@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getEmoji, guessesColors } from '$lib/repr';
+	import { displayTime } from '$lib/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 
@@ -7,12 +8,14 @@
 	import { fade, crossfade } from 'svelte/transition';
 	import { readable } from 'svelte/store';
 
-	export let gameState: Observable<PublicGameState>;
+	export let gameState: Observable<PublicGameState>[];
 
 	const dispatch = createEventDispatcher<{
 		changeName: string;
 		guess: string;
 	}>();
+
+	let guessScrollArea: HTMLDivElement;
 
 	// TODO: ver si se puede arreglar la animación
 	const [send, receive] = crossfade({
@@ -39,6 +42,8 @@
 	let changedName: string = $gameState.self.name;
 	let guess: string = '';
 
+	$: timeLeft = displayTime($gameState.endTime - $currentTime);
+
 	$: canGuess =
 		$gameState.status === 'playing' && $currentTime < $gameState.endTime && $currentTime > $gameState.startTime;
 
@@ -47,9 +52,13 @@
 	$: done = $gameState.wordsLengths.length === $gameState.self.currentWordIndex;
 
 	$: disabled = !canGuess || done;
+
+	// $: displayGames = $gameState.self.totalWords + "/" + $gameState.self.totalWords
 </script>
 
 <div class="flex flex-col justify-center items-center w-full gap-4 mt-6">
+	{timeLeft}
+	<!-- {$gameState.self.totalWords} -->
 	<div
 		style:background-color={$gameState.self.representation.color}
 		class="w-24 h-24 text-6xl flex items-center justify-center rounded-lg shadow-inner"
@@ -68,21 +77,26 @@
 </div>
 
 <div class="py-4 h-32 mx-auto w-min mb-16">
-	{#key $gameState.self.lastGuess?.time}
-		<div class="flex justify-center gap-1 mb-4 w-min mx-auto">
-			{#if $gameState.self.lastGuess}
-				{#each $gameState.self.lastGuess.result as result, index}
-					<span
-						in:receive={{ key: index }}
-						class="flex justify-center items-center h-8 w-8"
-						style:background-color={guessesColors[result]}
-					>
-						{$gameState.self.lastGuess.guess.at(index) ?? ''}
-					</span>
-				{/each}
-			{/if}
-		</div>
-	{/key}
+	<div bind:this={guessScrollArea} class="max-h-24 overflow-auto scroll-smooth">
+		{#each $gameState.self.lastGuess as ele, index}
+			{#key ele?.time}
+				<div class="flex justify-center gap-1 mb-4 w-min mx-auto">
+					{#if ele}
+						{#each ele.result as result, index}
+							<span
+								in:receive={{ key: index }}
+								class="flex justify-center items-center h-8 w-8"
+								style:background-color={guessesColors[result]}
+							>
+								{ele.guess.at(index) ?? ''}
+							</span>
+						{/each}
+					{/if}
+				</div>
+			{/key}
+		{/each}
+	</div>
+
 	{#key $gameState.self.lastGuess?.time}
 		<div class="flex justify-center gap-1 w-min mx-auto">
 			{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
@@ -105,6 +119,7 @@
 	on:submit|preventDefault={() => {
 		dispatch('guess', guess);
 		guess = '';
+		guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight * 3, behavior: 'smooth' });
 	}}
 	class="flex flex-col gap-4 justify-center items-center w-full"
 >
