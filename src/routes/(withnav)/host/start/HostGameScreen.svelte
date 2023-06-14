@@ -59,7 +59,7 @@
 </div>
 
 {#if $host.status === 'waiting'}
-	<QRCode codeValue={`${location.origin}${base}/play?game=${peer.id}`} squareSize="200" />
+	<QRCode codeValue={`${location.origin}${base}/play?game=${peer.id}`} />
 {/if}
 
 <!-- TODO: Tambien hay que ponerle el timer al host -->

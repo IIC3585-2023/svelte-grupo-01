@@ -33,7 +33,7 @@ declare global {
 		currentWordIndex: number;
 	}
 	declare type PublicGameState = {
-		self: PublicPlayer & { lastGuess?: PrivateGuess };
+		self: PublicPlayer & { currentWordGuesses: PrivateGuess[] };
 		players: (PublicPlayer & { lastGuess?: PublicGuess })[];
 		wordsLengths: number[];
 	} & ({ status: 'waiting' } | { status: 'playing'; startTime: number; endTime: number });

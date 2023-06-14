@@ -61,13 +61,11 @@
 
 	$: displayGames = $gameState.self.currentWordIndex + '/' + $gameState.wordsLengths.length;
 
-	let lastGuessCount = $gameState.self?.lastGuess?.length ?? 0;
+	let lastGuessCount = $gameState.self.currentWordGuesses.length ?? 0;
 
-	$: if (lastGuessCount !== $gameState.self.lastGuess.length) {
+	$: if (lastGuessCount !== $gameState.self.currentWordGuesses.length) {
+		lastGuessCount = $gameState.self.currentWordGuesses.length;
 		tick().then(() => guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight }));
-		// guessScrollArea.scrollTop = guessScrollArea.scrollHeight;
-
-		lastGuessCount = $gameState.self.lastGuess.length;
 	}
 </script>
 
@@ -97,15 +95,15 @@
 	class="h-28 overflow-auto bg-gray-200 shadow-inner my-4 scroll-smooth p-2 flex flex-col gap-4"
 	bind:this={guessScrollArea}
 >
-	{#each $gameState.self.lastGuess as ele, index}
+	{#each $gameState.self.currentWordGuesses as guess}
 		<div class="flex justify-center gap-1 w-min mx-auto">
-			{#each ele.result as result, index}
+			{#each guess.result as result, index}
 				<span
 					in:receive={{ key: index }}
 					class="flex justify-center items-center h-8 w-8"
 					style:background-color={guessesColors[result]}
 				>
-					{ele.guess.at(index) ?? ''}
+					{guess.guess.at(index) ?? ''}
 				</span>
 			{/each}
 		</div>
@@ -113,7 +111,7 @@
 </div>
 
 <div class="flex justify-center gap-1 w-min mx-auto [scrollbar-gutter:stable] mb-4">
-	{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index (`${$gameState.self.lastGuess?.time}-${index}`)}
+	{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
 		<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-8 w-8 bg-slate-200"
 			>{guess.at(index) ?? ''}</span
 		>

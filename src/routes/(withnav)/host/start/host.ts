@@ -175,8 +175,7 @@ function publicWaitingState(
 			name: player.name,
 			representation: player.representation,
 			currentWordIndex: player.currentWordIndex,
-			totalWords: game.words.length,
-			lastGuess: player.guesses.filter((g) => g.wordIndex === player.currentWordIndex),
+			currentWordGuesses: player.guesses.filter((g) => g.wordIndex === player.currentWordIndex),
 		},
 		players: state.players.map((p) => {
 			const lg = p.guesses[player.guesses.length - 1];
