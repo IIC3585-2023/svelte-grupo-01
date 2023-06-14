@@ -1,5 +1,6 @@
-import type { Peer, Connection } from '$lib/peer';
 import type { Readable } from 'svelte/store';
+import type { Peer, Connection } from '$lib/peer';
+
 import { subscriberHandler } from '$lib/storeUtils';
 import { Observable, fromEventPattern, first, shareReplay, filter } from 'rxjs';
 

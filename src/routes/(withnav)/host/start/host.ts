@@ -1,6 +1,7 @@
-import type { Readable, Subscriber } from 'svelte/store';
+import type { Readable } from 'svelte/store';
 import type { Game } from '../gamesDB';
 import type { Peer } from '$lib/peer';
+
 import { getRandomColor, getRandomEmojiIndex } from '$lib/repr';
 import { subscriberHandler } from '$lib/storeUtils';
 
@@ -50,7 +51,7 @@ export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
 				break;
 
 			case 'player-guess':
-				if (guardGuess(player)) return;
+				if (guardGuess(game, state, player)) return;
 				const word = game.words[player.currentWordIndex];
 
 				const { ok, match } = checkGuess(word, msg.guess);
@@ -66,25 +67,6 @@ export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
 				notifyAll();
 				break;
 		}
-	}
-
-	function guardGuess(player: PlayerInternalState) {
-		if (state.status === 'waiting') {
-			console.warn('Player guessed while the game is not running');
-			return true;
-		}
-		const time = Date.now();
-		if (time < state.startTime || time > state.endTime) {
-			console.warn('Player guessed outside of game time');
-			return true;
-		}
-
-		if (player.currentWordIndex >= game.words.length) {
-			console.warn('Player guessed after the game ended');
-			return true;
-		}
-
-		return false;
 	}
 
 	function start(delay: number = 1000) {
@@ -146,6 +128,25 @@ function checkGuess(word: string, guess: string) {
 		}
 	}
 	return { ok, match };
+}
+
+function guardGuess(game: Game, state: HostGameState, player: PlayerInternalState) {
+	if (state.status === 'waiting') {
+		console.warn('Player guessed while the game is not running');
+		return true;
+	}
+	const time = Date.now();
+	if (time < state.startTime || time > state.endTime) {
+		console.warn('Player guessed outside of game time');
+		return true;
+	}
+
+	if (player.currentWordIndex >= game.words.length) {
+		console.warn('Player guessed after the game ended');
+		return true;
+	}
+
+	return false;
 }
 
 function publicState(state: HostGameState, player: PlayerInternalState, game: Game): PublicGameState {
