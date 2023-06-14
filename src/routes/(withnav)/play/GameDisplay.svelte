@@ -1,19 +1,23 @@
 <script lang="ts">
 	import { getEmoji, guessesColors } from '$lib/repr';
 	import { displayTime } from '$lib/utils';
-	import { createEventDispatcher, tick } from 'svelte';
+	import { createEventDispatcher, onDestroy, tick } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 
 	import type { Observable } from 'rxjs';
 	import { fade, crossfade } from 'svelte/transition';
 	import { readable } from 'svelte/store';
+	import { shouldHideNav } from '$lib/shouldHideNav';
 
-	export let gameState: Observable<PublicGameState>[];
+	export let gameState: Observable<PublicGameState>;
 
 	const dispatch = createEventDispatcher<{
 		changeName: string;
 		guess: string;
 	}>();
+
+	$shouldHideNav = true;
+	onDestroy(() => ($shouldHideNav = false));
 
 	let guessScrollArea: HTMLDivElement;
 
@@ -42,7 +46,7 @@
 	let changedName: string = $gameState.self.name;
 	let guess: string = '';
 
-	$: timeLeft = displayTime($gameState.endTime - $currentTime);
+	$: timeLeft = displayTime($gameState.status === 'waiting' ? 0 : $gameState.endTime - $currentTime);
 
 	$: canGuess =
 		$gameState.status === 'playing' && $currentTime < $gameState.endTime && $currentTime > $gameState.startTime;
@@ -57,7 +61,8 @@
 
 	$: displayGames = $gameState.self.currentWordIndex + '/' + $gameState.wordsLengths.length;
 
-	let lastGuessCount = $gameState.self.lastGuess.length;
+	let lastGuessCount = $gameState.self?.lastGuess?.length ?? 0;
+
 	$: if (lastGuessCount !== $gameState.self.lastGuess.length) {
 		tick().then(() => guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight }));
 		// guessScrollArea.scrollTop = guessScrollArea.scrollHeight;
@@ -66,7 +71,7 @@
 	}
 </script>
 
-<div class="flex flex-col justify-center items-center w-full gap-4 mt-6">
+<div class="flex flex-col justify-center items-center w-full gap-1 my-4">
 	{timeLeft}
 	<p class="font-bold">
 		Words guessed {displayGames}
@@ -88,36 +93,31 @@
 	</form>
 </div>
 
-<div class="py-4 mx-auto w-min mb-16">
-	<div class="max-h-24 overflow-auto scroll-smooth" bind:this={guessScrollArea}>
-		{#each $gameState.self.lastGuess as ele, index}
-			{#key ele?.time}
-				<div class="flex justify-center gap-1 mb-4 w-min mx-auto">
-					{#if ele}
-						{#each ele.result as result, index}
-							<span
-								in:receive={{ key: index }}
-								class="flex justify-center items-center h-8 w-8"
-								style:background-color={guessesColors[result]}
-							>
-								{ele.guess.at(index) ?? ''}
-							</span>
-						{/each}
-					{/if}
-				</div>
-			{/key}
-		{/each}
-	</div>
-
-	{#key $gameState.self.lastGuess?.time}
-		<div class="flex justify-center gap-1 w-min mx-auto h-12">
-			{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
-				<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-8 w-8 bg-slate-200"
-					>{guess.at(index) ?? ''}</span
+<div
+	class="h-28 overflow-auto bg-gray-200 shadow-inner my-4 scroll-smooth p-2 flex flex-col gap-4"
+	bind:this={guessScrollArea}
+>
+	{#each $gameState.self.lastGuess as ele, index}
+		<div class="flex justify-center gap-1 w-min mx-auto">
+			{#each ele.result as result, index}
+				<span
+					in:receive={{ key: index }}
+					class="flex justify-center items-center h-8 w-8"
+					style:background-color={guessesColors[result]}
 				>
+					{ele.guess.at(index) ?? ''}
+				</span>
 			{/each}
 		</div>
-	{/key}
+	{/each}
+</div>
+
+<div class="flex justify-center gap-1 w-min mx-auto [scrollbar-gutter:stable] mb-4">
+	{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index (`${$gameState.self.lastGuess?.time}-${index}`)}
+		<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-8 w-8 bg-slate-200"
+			>{guess.at(index) ?? ''}</span
+		>
+	{/each}
 </div>
 
 {#if done}
@@ -131,21 +131,21 @@
 	on:submit|preventDefault={() => {
 		dispatch('guess', guess);
 		guess = '';
-		tick().then(() => guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight }));
-		// guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight * 2, behavior: 'smooth' });
 	}}
-	class="flex flex-col gap-4 justify-center items-center w-full"
+	class="flex flex-col justify-center border border-orange-200 items-center rounded-lg overflow-clip w-min mx-auto"
 >
 	<input
 		bind:value={guess}
 		{disabled}
 		type="text"
 		name="word"
-		class="font-mono font-bold text-xl border shadow-inner"
+		class="font-mono font-bold text-xl shadow-inner bg-gray-50 py-1 text-center focus-visible:outline-none w-40"
 		minlength={$gameState.wordsLengths[$gameState.self.currentWordIndex]}
 		maxlength={$gameState.wordsLengths[$gameState.self.currentWordIndex]}
 	/>
-	<button type="submit" {disabled} class="disabled:bg-orange-200 bg-orange-500 text-orange-50 px-4 py-2">Submit</button>
+	<button type="submit" {disabled} class="disabled:bg-orange-200 bg-orange-500 text-orange-50 text-center py-1 w-full"
+		>Submit</button
+	>
 </form>
 
 {#if $gameState.status === 'waiting'}
