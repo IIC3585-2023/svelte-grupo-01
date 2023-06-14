@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { getEmoji, guessesColors } from '$lib/repr';
 	import type { PlayerInternalState } from './host';
+	import type { Game } from '../gamesDB';
 	import { flip } from 'svelte/animate';
 
 	export let players: PlayerInternalState[];
+	export let game: Game;
 </script>
 
 <ul class="flex flex-col gap-4 p-4">
+	{#if players.length === 0}
+		<li class="text-center">Waiting for players...</li>
+	{/if}
 	{#each players as { representation, name, id, currentWordIndex, guesses } (id)}
 		<li class="flex gap-2" animate:flip>
 			<div
@@ -20,7 +25,7 @@
 					{name || 'Anonymous'}
 				</div>
 				<div>
-					{currentWordIndex} words guessed
+					{currentWordIndex} / {game.words.length} words guessed
 				</div>
 				<div>
 					{guesses.length} attempts

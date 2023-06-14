@@ -57,7 +57,7 @@ export function createGameHostStore(peer: Peer, game: Game): HostGameStore {
 				player.guesses.push({
 					wordIndex: player.currentWordIndex,
 					time: Date.now(),
-					guess: msg.guess,
+					guess: msg.guess.toLowerCase(),
 					result: match,
 				});
 
@@ -175,7 +175,8 @@ function publicWaitingState(
 			name: player.name,
 			representation: player.representation,
 			currentWordIndex: player.currentWordIndex,
-			lastGuess: player.guesses[player.guesses.length - 1],
+			totalWords: game.words.length,
+			lastGuess: player.guesses.filter((g) => g.wordIndex === player.currentWordIndex),
 		},
 		players: state.players.map((p) => {
 			const lg = p.guesses[player.guesses.length - 1];

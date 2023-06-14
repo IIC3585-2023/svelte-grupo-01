@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import type { Peer } from '$lib/peer';
+	// import { displayTime } from '$lib/utils';
 	import { onDestroy } from 'svelte';
 	import type { Game } from '../gamesDB';
 	import PlayerRanking from './PlayerRanking.svelte';
+	import QRCode from './QRJS.svelte';
+	// import { readable } from 'svelte/store';
 
 	import { createGameHostStore } from './host';
 
@@ -11,6 +14,18 @@
 	export let game: Game;
 
 	const host = createGameHostStore(peer, game);
+	// let finishTime = 0;
+	// function setFinishTime(time: number) {
+	// 	finishTime = Date.now() + time;
+	// 	console.log(finishTime, time);
+	// }
+
+	// const currentTime = readable(Date.now(), (set) => {
+	// 	const interval = setInterval(() => set(Date.now()), 1000);
+	// 	return () => clearInterval(interval);
+	// });
+
+	// $: timeLeft = displayTime(finishTime - $currentTime);
 	onDestroy(() => host.destroy());
 </script>
 
@@ -33,8 +48,20 @@
 			Copy link
 		</button>
 
-		<button on:click={() => host.start()} class="px-4 py-2 bg-orange-300 rounded text-orange-950">Start Game</button>
+		<button
+			on:click={() => {
+				host.start();
+				// setFinishTime(game.timeInSeconds);
+			}}
+			class="px-4 py-2 bg-orange-300 rounded text-orange-950">Start Game</button
+		>
 	{/if}
 </div>
 
-<PlayerRanking players={$host.players} />
+{#if $host.status === 'waiting'}
+	<QRCode codeValue={`${location.origin}${base}/play?game=${peer.id}`} squareSize="200" />
+{/if}
+
+<!-- TODO: Tambien hay que ponerle el timer al host -->
+<!-- {timeLeft} -->
+<PlayerRanking players={$host.players} {game} />

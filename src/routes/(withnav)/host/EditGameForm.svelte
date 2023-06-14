@@ -17,16 +17,13 @@
 	function handleAddNewWord() {
 		if (wordsWithIdAttr.find(({ word }) => word === newWord)) return;
 
-		wordsWithIdAttr.push({ word: newWord, id: newWord });
+		wordsWithIdAttr.push({ word: newWord.toLowerCase(), id: newWord });
 		wordsWithIdAttr = wordsWithIdAttr;
 		newWord = '';
 	}
 </script>
 
-<form
-	on:submit|preventDefault={() =>
-		dispatch('submit', { ...game, words: wordsWithIdAttr.map((e) => e.word) })}
->
+<form on:submit|preventDefault={() => dispatch('submit', { ...game, words: wordsWithIdAttr.map((e) => e.word) })}>
 	<div class="flex gap-4 my-4 items-center">
 		<label class="flex-grow flex gap-2">
 			<span class="font-bold">Name:</span>
@@ -51,14 +48,9 @@
 		class="flex flex-col gap-2 my-2"
 	>
 		{#each wordsWithIdAttr as { word, id } (id)}
-			<li
-				class="px-4 py-2 bg-orange-50 flex justify-between gap-2 rounded"
-				animate:flip={{ duration: flipDurationMs }}
-			>
+			<li class="px-4 py-2 bg-orange-50 flex justify-between gap-2 rounded" animate:flip={{ duration: flipDurationMs }}>
 				<div>{word}</div>
-				<button
-					class="text-orange-800"
-					on:click={() => (wordsWithIdAttr = wordsWithIdAttr.filter((e) => e.id !== id))}
+				<button class="text-orange-800" on:click={() => (wordsWithIdAttr = wordsWithIdAttr.filter((e) => e.id !== id))}
 					>Delete</button
 				>
 			</li>
