@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import type { Peer } from '$lib/peer';
 	// import { displayTime } from '$lib/utils';
+	import { onDestroy } from 'svelte';
 	import type { Game } from '../gamesDB';
 	import PlayerRanking from './PlayerRanking.svelte';
 	import QRCode from './QRJS.svelte';
@@ -25,6 +26,7 @@
 	// });
 
 	// $: timeLeft = displayTime(finishTime - $currentTime);
+	onDestroy(() => host.destroy());
 </script>
 
 <div class="text-center mt-4">
