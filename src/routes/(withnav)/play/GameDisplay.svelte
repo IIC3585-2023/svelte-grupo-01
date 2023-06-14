@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getEmoji, guessesColors } from '$lib/repr';
 	import { displayTime } from '$lib/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, tick } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 
 	import type { Observable } from 'rxjs';
@@ -53,12 +53,24 @@
 
 	$: disabled = !canGuess || done;
 
-	// $: displayGames = $gameState.self.totalWords + "/" + $gameState.self.totalWords
+	console.log($gameState.self.currentWordIndex + 1, $gameState.wordsLengths.length);
+
+	$: displayGames = $gameState.self.currentWordIndex + '/' + $gameState.wordsLengths.length;
+
+	let lastGuessCount = $gameState.self.lastGuess.length;
+	$: if (lastGuessCount !== $gameState.self.lastGuess.length) {
+		tick().then(() => guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight }));
+		// guessScrollArea.scrollTop = guessScrollArea.scrollHeight;
+
+		lastGuessCount = $gameState.self.lastGuess.length;
+	}
 </script>
 
 <div class="flex flex-col justify-center items-center w-full gap-4 mt-6">
 	{timeLeft}
-	<!-- {$gameState.self.totalWords} -->
+	<p class="font-bold">
+		Words guessed {displayGames}
+	</p>
 	<div
 		style:background-color={$gameState.self.representation.color}
 		class="w-24 h-24 text-6xl flex items-center justify-center rounded-lg shadow-inner"
@@ -76,8 +88,8 @@
 	</form>
 </div>
 
-<div class="py-4 h-32 mx-auto w-min mb-16">
-	<div bind:this={guessScrollArea} class="max-h-24 overflow-auto scroll-smooth">
+<div class="py-4 mx-auto w-min mb-16">
+	<div class="max-h-24 overflow-auto scroll-smooth" bind:this={guessScrollArea}>
 		{#each $gameState.self.lastGuess as ele, index}
 			{#key ele?.time}
 				<div class="flex justify-center gap-1 mb-4 w-min mx-auto">
@@ -98,7 +110,7 @@
 	</div>
 
 	{#key $gameState.self.lastGuess?.time}
-		<div class="flex justify-center gap-1 w-min mx-auto">
+		<div class="flex justify-center gap-1 w-min mx-auto h-12">
 			{#each { length: $gameState.wordsLengths[$gameState.self.currentWordIndex] } as _, index}
 				<span in:fade out:send={{ key: index }} class="flex justify-center items-center h-8 w-8 bg-slate-200"
 					>{guess.at(index) ?? ''}</span
@@ -119,7 +131,8 @@
 	on:submit|preventDefault={() => {
 		dispatch('guess', guess);
 		guess = '';
-		guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight * 3, behavior: 'smooth' });
+		tick().then(() => guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight }));
+		// guessScrollArea.scrollTo({ top: guessScrollArea.scrollHeight * 2, behavior: 'smooth' });
 	}}
 	class="flex flex-col gap-4 justify-center items-center w-full"
 >

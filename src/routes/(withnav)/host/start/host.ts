@@ -174,7 +174,7 @@ function publicWaitingState(
 			id: player.id,
 			name: player.name,
 			representation: player.representation,
-			// currentWordIndex: player.currentWordIndex,
+			currentWordIndex: player.currentWordIndex,
 			totalWords: game.words.length,
 			lastGuess: player.guesses.filter((g) => g.wordIndex === player.currentWordIndex),
 		},
