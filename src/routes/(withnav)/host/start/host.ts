@@ -194,7 +194,7 @@ function publicWaitingState(
 function sortPlayers(players: PlayerInternalState[]) {
 	players.sort((a, b) => {
 		if (a.currentWordIndex === b.currentWordIndex) {
-			return b.guesses.length - a.guesses.length;
+			return a.guesses.length - b.guesses.length;
 		}
 
 		return b.currentWordIndex - a.currentWordIndex;
