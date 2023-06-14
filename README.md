@@ -1,38 +1,61 @@
-# create-svelte
+# SvelteJS - Grupo 1
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This project is a Competitive Wordle with a host and multiple clients. The host can create a game with multiple words to guess. The clients can join the game using a QR code from the host.
 
-## Creating a project
+The resources used for this project are:
 
-If you're seeing this, you've probably already done this step. Congrats!
+- [Web Page](https://iic3585-2023.github.io/svelte-grupo-01/)
+- [Presentation](/slides/svelte.pdf)
+
+## Contributors
+
+| Name                | Email              | Github                                           |
+| ------------------- | ------------------ | ------------------------------------------------ |
+| Jose Antonio Castro | jacastro18@uc.cl   | [@Baelfire18](https://github.com/Baelfire18)     |
+| Benjamín Vicente    | benjavicente@uc.cl | [@benjavicente](https://github.com/benjavicente) |
+| José Madriaza       | jm.madriaza@uc.cl  | [@LeoMo-27](https://github.com/LeoMo-27)         |
+
+
+## Stack
+
+- Node 18.0.0
+- Svelte 3.54.0
+- SvelteKit 1.5.0
+- Typescript
+- TailwindCSS
+- RxJS
+- QRCode
+
+## How to run
+
+### Install pnpm and dependencies
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+npm install -g pnpm
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
 ```
 
-## Building
+### Development Server
 
-To create a production version of your app:
+Start the development server on `http://localhost:5173`:
 
 ```bash
-npm run build
+pnpm dev
 ```
 
-You can preview the production build with `npm run preview`.
+### Production
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Build the application for production:
+
+```bash
+pnpm run build
+```
+
+Locally preview production build:
+
+```bash
+pnpm run preview
+```
