@@ -1,33 +1,16 @@
-<script>
-	import { onMount } from 'svelte';
+<script lang="ts">
+	import QRCode from 'qrcode';
 
-	export let codeValue;
-	export let squareSize;
+	export let codeValue: string;
 
-	let qrcode;
-
-	onMount(() => {
-		let script = document.createElement('script');
-		script.src = 'https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js';
-		document.head.append(script);
-
-		script.onload = function () {
-			qrcode = new QRCode('qrcode', {
-				text: codeValue,
-				width: squareSize,
-				height: squareSize,
-				colorDark: '#000000',
-				colorLight: '#ffffff',
-				correctLevel: QRCode.CorrectLevel.H,
-			});
-		};
-
-		document.getElementById('qrcode').addEventListener('click', () => {
-			window.open(codeValue, '_blank', 'noopener,noreferrer');
-		});
-	});
+	function qr(node: HTMLCanvasElement, codeValue: string) {
+		QRCode.toCanvas(node, codeValue, { color: { light: '#00000000' } });
+	}
 </script>
 
-<div class="flex justify-center items-center py-4">
-	<div id="qrcode" class="flex justify-center items-center w-32 h-32" />
-</div>
+<canvas
+	use:qr={codeValue}
+	on:click={() => window.open(codeValue, '_blank', 'noopener,noreferrer')}
+	id="qrcode"
+	class="flex justify-center items-center w-40 h-40 mx-auto"
+/>
